@@ -30,6 +30,18 @@ export const useAppState = () => {
           startTime: new Date(record.startTime),
           endTime: record.endTime ? new Date(record.endTime) : undefined
         }));
+        
+        // محاسبه مجدد تلاش‌های امروز (در صورت تغییر روز)
+        const today = new Date();
+        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+        
+        const actualTodayAttempts = parsedState.pauseRecords.filter((record: any) => {
+          const recordDate = new Date(record.startTime);
+          return recordDate >= todayStart && recordDate < todayEnd;
+        }).length;
+        
+        parsedState.todayAttempts = actualTodayAttempts;
         setAppState(parsedState);
       }
     } catch (error) {
@@ -46,6 +58,18 @@ export const useAppState = () => {
     } catch (error) {
       console.error('Error saving app state:', error);
     }
+  };
+
+  // محاسبه تعداد تلاش‌های امروز بر اساس رکوردهای واقعی
+  const getTodayAttempts = (): number => {
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+
+    return appState.pauseRecords.filter(record => {
+      const recordDate = new Date(record.startTime);
+      return recordDate >= todayStart && recordDate < todayEnd;
+    }).length;
   };
 
   const setDecision = (decision: string) => {
@@ -66,10 +90,22 @@ export const useAppState = () => {
       exitedEarly: false
     };
 
+    const updatedRecords = [...appState.pauseRecords, newRecord];
+    
+    // محاسبه تعداد واقعی تلاش‌های امروز
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+    
+    const todayAttemptsCount = updatedRecords.filter(record => {
+      const recordDate = new Date(record.startTime);
+      return recordDate >= todayStart && recordDate < todayEnd;
+    }).length;
+
     const newState = {
       ...appState,
-      pauseRecords: [...appState.pauseRecords, newRecord],
-      todayAttempts: appState.todayAttempts + 1
+      pauseRecords: updatedRecords,
+      todayAttempts: todayAttemptsCount
     };
     
     saveAppState(newState);

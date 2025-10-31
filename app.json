@@ -36,6 +36,12 @@
     "scheme": "mind-pause",
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d54c3fd7-f0f7-437b-9aab-3e840c912c62"
+      }
     }
   }
 }
