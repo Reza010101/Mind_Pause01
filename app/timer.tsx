@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useAppState } from '../src/hooks/useAppState';
+import { useAppState } from '../src/context/AppStateContext';
 import { MOTIVATIONAL_MESSAGES, TIMER_DURATION } from '../src/types';
 
 export default function TimerScreen() {
@@ -48,10 +48,11 @@ export default function TimerScreen() {
         // بررسی نیاز به تغییر پیام
         const newTime = prev - 1;
         const currentSeconds = TIMER_DURATION - newTime;
-        const newMessage = MOTIVATIONAL_MESSAGES.find(msg => 
-          currentSeconds >= msg.showAt && 
-          (MOTIVATIONAL_MESSAGES.find(next => next.showAt > msg.showAt)?.showAt > currentSeconds || !MOTIVATIONAL_MESSAGES.find(next => next.showAt > msg.showAt))
-        );
+        const newMessage = MOTIVATIONAL_MESSAGES.find(msg => {
+          if (currentSeconds < msg.showAt) return false;
+          const nextMessage = MOTIVATIONAL_MESSAGES.find(next => next.showAt > msg.showAt);
+          return !nextMessage || currentSeconds < nextMessage.showAt;
+        });
         if (newMessage && newMessage.id !== currentMessage.id) {
           setCurrentMessage(newMessage);
         }

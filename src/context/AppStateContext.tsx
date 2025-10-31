@@ -1,10 +1,26 @@
-import { useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState, PauseRecord } from '../types';
 
 const STORAGE_KEY = 'mindPause_appState';
 
-export const useAppState = () => {
+// تعریف نوع Context
+interface AppStateContextType {
+  appState: AppState;
+  loading: boolean;
+  setDecision: (decision: string) => Promise<void>;
+  startPause: () => Promise<string>;
+  completePause: (recordId: string, completed: boolean, exitedEarly: boolean) => Promise<void>;
+  clearAllData: () => Promise<void>;
+  resetDecision: () => Promise<void>;
+  updateDecision: (newDecision: string) => Promise<void>;
+}
+
+// ایجاد Context
+const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
+
+// Provider Component
+export const AppStateProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [appState, setAppState] = useState<AppState>({
     currentDecision: null,
     hasSetDecision: false,
@@ -68,18 +84,7 @@ export const useAppState = () => {
     }
   };
 
-  // محاسبه تعداد تلاش‌های امروز بر اساس رکوردهای واقعی
-  const getTodayAttempts = (): number => {
-    const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
-
-    return appState.pauseRecords.filter(record => {
-      const recordDate = new Date(record.startTime);
-      return recordDate >= todayStart && recordDate < todayEnd;
-    }).length;
-  };
-
+  // تمام توابع state management
   const setDecision = async (decision: string) => {
     const newState = {
       ...appState,
@@ -169,13 +174,13 @@ export const useAppState = () => {
     }
   };
 
-  const resetDecision = () => {
+  const resetDecision = async () => {
     const newState = {
       ...appState,
       currentDecision: '',
       hasSetDecision: false
     };
-    saveAppState(newState);
+    await saveAppState(newState);
   };
 
   const updateDecision = async (newDecision: string) => {
@@ -187,7 +192,7 @@ export const useAppState = () => {
     await saveAppState(newState);
   };
 
-  return {
+  const contextValue: AppStateContextType = {
     appState,
     loading,
     setDecision,
@@ -197,4 +202,19 @@ export const useAppState = () => {
     resetDecision,
     updateDecision
   };
+
+  return (
+    <AppStateContext.Provider value={contextValue}>
+      {children}
+    </AppStateContext.Provider>
+  );
+};
+
+// Hook برای استفاده از Context
+export const useAppState = (): AppStateContextType => {
+  const context = useContext(AppStateContext);
+  if (context === undefined) {
+    throw new Error('useAppState must be used within an AppStateProvider');
+  }
+  return context;
 };

@@ -1,10 +1,11 @@
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialIcons } from '@expo/vector-icons';
+import { AppStateProvider } from '../src/context/AppStateContext';
 
 export default function RootLayout() {
   return (
-    <>
+    <AppStateProvider>
       <StatusBar style="auto" />
       <Tabs
         screenOptions={{
@@ -60,7 +61,7 @@ export default function RootLayout() {
           }}
         />
       </Tabs>
-    </>
+    </AppStateProvider>
   );
 }
 

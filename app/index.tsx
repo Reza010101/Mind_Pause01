@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAppState } from '../src/hooks/useAppState';
+import { useAppState } from '../src/context/AppStateContext';
 
 export default function HomeScreen() {
   const router = useRouter();

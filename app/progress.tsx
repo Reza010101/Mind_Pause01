@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useAppState } from '../src/hooks/useAppState';
+import { useAppState } from '../src/context/AppStateContext';
 
 export default function ProgressScreen() {
   const { appState } = useAppState();
