@@ -7,6 +7,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { appState, loading, setDecision, startPause } = useAppState();
   const [tempDecision, setTempDecision] = useState('');
+  const [isButtonPressed, setIsButtonPressed] = useState(false);
 
   if (loading) {
     return (
@@ -57,14 +58,22 @@ export default function HomeScreen() {
         ) : (
           // نمایش تصمیم ثبت شده + دکمه اصلی
           <View style={styles.decisionDisplay}>
-            <Text style={styles.sectionTitle}>تصمیم من:</Text>
             <View style={styles.decisionCard}>
+              <Text style={styles.decisionCardTitle}>تصمیم من</Text>
               <Text style={styles.decisionText}>{appState.currentDecision}</Text>
             </View>
             
-            <TouchableOpacity style={styles.mainButton} onPress={handleStartPause}>
-              <Text style={styles.mainButtonText}>ذهنم می‌گه انجامش بده</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={[styles.mainButton, isButtonPressed && styles.mainButtonPressed]} 
+                onPress={handleStartPause}
+                onPressIn={() => setIsButtonPressed(true)}
+                onPressOut={() => setIsButtonPressed(false)}
+                activeOpacity={1}
+              >
+                <Text style={styles.mainButtonText}>ذهنم می‌گه انجامش بده</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
 
@@ -152,26 +161,56 @@ const styles = StyleSheet.create({
   },
   decisionCard: {
     backgroundColor: 'white',
-    padding: 20,
+    padding: 16,
     borderRadius: 12,
+    alignItems: 'center',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
     marginBottom: 24,
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-    borderLeftWidth: 4,
-    borderLeftColor: '#4CAF50',
+  },
+  decisionCardTitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
   },
   decisionText: {
     fontSize: 16,
-    lineHeight: 24,
-    color: '#333',
-    textAlign: 'right',
+    fontWeight: '600',
+    color: '#4CAF50',
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    height: 80, // ارتفاع ثابت برای جلوگیری از تغییر layout
+    marginBottom: 20,
+    justifyContent: 'flex-start',
   },
   mainButton: {
     backgroundColor: '#FF5722',
     padding: 20,
-    borderRadius: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 20,
-    boxShadow: '0 4px 12px rgba(255, 87, 34, 0.3)',
+    position: 'absolute',
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    // افکت کلید سه‌بعدی
+    borderTopWidth: 3,
+    borderLeftWidth: 3,
+    borderRightWidth: 3,
+    borderBottomWidth: 6,
+    borderTopColor: '#FF7043',
+    borderLeftColor: '#FF7043',
+    borderRightColor: '#D84315',
+    borderBottomColor: '#BF360C',
+  },
+  mainButtonPressed: {
+    // افکت فشردگی کلید
+    borderBottomWidth: 3,
+    top: 3, // حرکت داخل container ثابت
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
   },
   mainButtonText: {
     color: 'white',

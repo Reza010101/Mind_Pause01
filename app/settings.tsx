@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
+import { MaterialIcons, Feather, Ionicons } from '@expo/vector-icons';
 import { useAppState } from '../src/context/AppStateContext';
 
 export default function SettingsScreen() {
@@ -65,7 +66,10 @@ export default function SettingsScreen() {
       <View style={styles.content}>
         {/* اطلاعات اپ */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📱 اطلاعات اپلیکیشن</Text>
+          <View style={styles.sectionHeader}>
+            <MaterialIcons name="info" size={24} color="#2196F3" />
+            <Text style={styles.sectionTitle}>اطلاعات اپلیکیشن</Text>
+          </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>نسخه:</Text>
             <Text style={styles.infoValue}>1.0.0</Text>
@@ -77,32 +81,54 @@ export default function SettingsScreen() {
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>تصمیم فعلی:</Text>
             <Text style={styles.infoValue}>
-              {appState.hasSetDecision ? '✅ ثبت شده' : '❌ ثبت نشده'}
+              {appState.hasSetDecision ? 
+                <MaterialIcons name="check-circle" size={16} color="#4CAF50" /> : 
+                <MaterialIcons name="cancel" size={16} color="#F44336" />
+              }
+              <Text style={{ marginLeft: 4 }}>
+                {appState.hasSetDecision ? 'ثبت شده' : 'ثبت نشده'}
+              </Text>
             </Text>
           </View>
         </View>
 
         {/* ویرایش */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>✏️ ویرایش</Text>
+          <View style={styles.sectionHeader}>
+            <Feather name="edit-3" size={24} color="#4CAF50" />
+            <Text style={styles.sectionTitle}>ویرایش</Text>
+          </View>
           
           <TouchableOpacity style={styles.actionButton} onPress={handleOpenEditModal}>
-            <Text style={styles.actionButtonText}>ویرایش تصمیم</Text>
-            <Text style={styles.actionButtonDesc}>تصمیم جدیدی ثبت کنید</Text>
+            <View style={styles.actionButtonContent}>
+              <Feather name="edit" size={20} color="#4CAF50" />
+              <View style={styles.actionButtonTextContainer}>
+                <Text style={styles.actionButtonText}>ویرایش تصمیم</Text>
+                <Text style={styles.actionButtonDesc}>تصمیم جدیدی ثبت کنید</Text>
+              </View>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity 
             style={[styles.actionButton, styles.dangerButton]} 
             onPress={handleClearData}
           >
-            <Text style={[styles.actionButtonText, styles.dangerText]}>حذف تصمیم و تاریخچه</Text>
-            <Text style={styles.actionButtonDesc}>تصمیم و تمام تاریخچه حذف خواهد شد</Text>
+            <View style={styles.actionButtonContent}>
+              <MaterialIcons name="delete-forever" size={20} color="#F44336" />
+              <View style={styles.actionButtonTextContainer}>
+                <Text style={[styles.actionButtonText, styles.dangerText]}>حذف تصمیم و تاریخچه</Text>
+                <Text style={styles.actionButtonDesc}>تصمیم و تمام تاریخچه حذف خواهد شد</Text>
+              </View>
+            </View>
           </TouchableOpacity>
         </View>
 
         {/* حریم خصوصی */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🔒 حریم خصوصی</Text>
+          <View style={styles.sectionHeader}>
+            <MaterialIcons name="security" size={24} color="#9C27B0" />
+            <Text style={styles.sectionTitle}>حریم خصوصی</Text>
+          </View>
           <Text style={styles.privacyText}>
             تمام اطلاعات شما فقط روی گوشی ذخیره می‌شود و هیچ‌گاه به سرور ارسال نمی‌گردد.
           </Text>
@@ -121,7 +147,7 @@ export default function SettingsScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>ویرایش تصمیم</Text>
               <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>✕</Text>
+                <MaterialIcons name="close" size={24} color="#666" />
               </TouchableOpacity>
             </View>
             
@@ -193,12 +219,18 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 16,
+    flex: 1,
     textAlign: 'right',
+    marginRight: 12,
   },
   infoRow: {
     flexDirection: 'row',

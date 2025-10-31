@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { MaterialIcons, Feather, AntDesign, Ionicons } from '@expo/vector-icons';
 
 export default function HelpScreen() {
   return (
@@ -11,18 +12,24 @@ export default function HelpScreen() {
       
       <View style={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🎯 فلسفه اپ</Text>
+          <View style={styles.sectionHeader}>
+            <MaterialIcons name="psychology" size={24} color="#2196F3" />
+            <Text style={styles.sectionTitle}>فلسفه اپ</Text>
+          </View>
           <Text style={styles.text}>
             هدف این اپ ایجاد «فضای مکث» در مواجهه با عادت‌های مضر است.
             {'\n\n'}
-            چرخه عادت: محرک → هوس ذهنی → عمل → پاداش
+            چرخه عادت: محرک ← هوس ذهنی ← عمل ← پاداش
             {'\n\n'}
-            ما این چرخه را با ایجاد مکث آگاهانه قطع می‌کنیم.
+            شما این چرخه را با ایجاد مکث آگاهانه قطع می‌کنید.
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📝 مرحله 1: ثبت تصمیم</Text>
+          <View style={styles.sectionHeader}>
+            <Feather name="edit-3" size={24} color="#4CAF50" />
+            <Text style={styles.sectionTitle}>مرحله 1: ثبت تصمیم</Text>
+          </View>
           <Text style={styles.text}>
             ابتدا تصمیم خود را به صورت مثبت بنویسید.
             {'\n'}
@@ -31,7 +38,10 @@ export default function HelpScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>⏰ مرحله 2: مکث 60 ثانیه</Text>
+          <View style={styles.sectionHeader}>
+            <MaterialIcons name="timer" size={24} color="#FF9800" />
+            <Text style={styles.sectionTitle}>مرحله 2: مکث 60 ثانیه</Text>
+          </View>
           <Text style={styles.text}>
             وقتی هوس به سراغتان آمد، دکمه "ذهنم می‌گه انجامش بده" را بزنید.
             {'\n\n'}
@@ -42,7 +52,10 @@ export default function HelpScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📊 پیگیری پیشرفت</Text>
+          <View style={styles.sectionHeader}>
+            <MaterialIcons name="trending-up" size={24} color="#9C27B0" />
+            <Text style={styles.sectionTitle}>پیگیری پیشرفت</Text>
+          </View>
           <Text style={styles.text}>
             هر بار که موفق به مقاومت شوید، در آمار ثبت می‌شود.
             {'\n\n'}
@@ -91,12 +104,18 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 12,
+    flex: 1,
     textAlign: 'right',
+    marginRight: 12,
   },
   text: {
     fontSize: 16,

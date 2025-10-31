@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Animated } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 import { useAppState } from '../src/context/AppStateContext';
 import { MOTIVATIONAL_MESSAGES, TIMER_DURATION } from '../src/types';
 
@@ -12,6 +13,12 @@ export default function TimerScreen() {
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
   const [currentMessage, setCurrentMessage] = useState(MOTIVATIONAL_MESSAGES[0]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [showCongrats, setShowCongrats] = useState(false);
+  
+  // انیمیشن نفس‌کشی
+  const breathingScale1 = React.useRef(new Animated.Value(1)).current;
+  const breathingScale2 = React.useRef(new Animated.Value(0.85)).current;
+  const breathingScale3 = React.useRef(new Animated.Value(0.7)).current;
 
   // ریست کردن state ها با هر recordId جدید
   useEffect(() => {
@@ -20,6 +27,69 @@ export default function TimerScreen() {
     setIsCompleted(false);
   }, [recordId]);
 
+  // انیمیشن نفس‌کشی ساده و روان
+  useEffect(() => {
+    if (isCompleted) return;
+
+    const startBreathingAnimation = () => {
+      // سیکل کامل تنفس با مکث‌های طبیعی
+      Animated.sequence([
+        // دم - بزرگ شدن
+        Animated.parallel([
+          Animated.timing(breathingScale1, {
+            toValue: 1.15,
+            duration: 3500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(breathingScale2, {
+            toValue: 1.0,
+            duration: 3500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(breathingScale3, {
+            toValue: 0.85,
+            duration: 3500,
+            useNativeDriver: true,
+          })
+        ]),
+        // مکث در انتهای دم - نگه داشتن
+        Animated.delay(1200),
+        // بازدم - کوچک شدن
+        Animated.parallel([
+          Animated.timing(breathingScale1, {
+            toValue: 0.9,
+            duration: 3500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(breathingScale2, {
+            toValue: 0.75,
+            duration: 3500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(breathingScale3, {
+            toValue: 0.6,
+            duration: 3500,
+            useNativeDriver: true,
+          })
+        ]),
+        // مکث قبل از دم بعدی
+        Animated.delay(1000)
+      ]).start(() => {
+        if (!isCompleted) {
+          startBreathingAnimation();
+        }
+      });
+    };
+
+    startBreathingAnimation();
+    
+    return () => {
+      breathingScale1.stopAnimation();
+      breathingScale2.stopAnimation();
+      breathingScale3.stopAnimation();
+    };
+  }, [isCompleted]);
+
   const handleTimerComplete = async () => {
     if (isCompleted) return; // جلوگیری از اجرای مکرر
     
@@ -27,11 +97,8 @@ export default function TimerScreen() {
     // ثبت موفقیت
     await completePause(recordId as string, true, false);
     
-    Alert.alert(
-      'تبریک! 🎉',
-      'شما موفق شدید تا انتهای مکث صبر کنید. این یک پیروزی بزرگ است!',
-      [{ text: 'متشکرم', onPress: () => router.back() }]
-    );
+    // نمایش modal تبریک زیبا
+    setShowCongrats(true);
   };
 
   useEffect(() => {
@@ -84,7 +151,7 @@ export default function TimerScreen() {
     <View style={styles.container}>
       {/* دکمه خروج */}
       <TouchableOpacity style={styles.exitButton} onPress={handleExit}>
-        <Text style={styles.exitButtonText}>✕</Text>
+        <MaterialIcons name="close" size={24} color="white" />
       </TouchableOpacity>
 
       {/* نمایش تصمیم */}
@@ -93,8 +160,41 @@ export default function TimerScreen() {
         <Text style={styles.decisionText}>{currentDecision}</Text>
       </View>
 
-      {/* تایمر */}
+      {/* تایمر با انیمیشن نفس‌کشی */}
       <View style={styles.timerContainer}>
+        {/* دایره‌های پس‌زمینه برای جلوه نفس‌کشی */}
+        <Animated.View 
+          style={[
+            styles.breathingCircle, 
+            styles.breathingCircle1,
+            {
+              transform: [{ scale: breathingScale1 }],
+              opacity: 0.3,
+            }
+          ]} 
+        />
+        <Animated.View 
+          style={[
+            styles.breathingCircle, 
+            styles.breathingCircle2,
+            {
+              transform: [{ scale: breathingScale2 }],
+              opacity: 0.2,
+            }
+          ]} 
+        />
+        <Animated.View 
+          style={[
+            styles.breathingCircle, 
+            styles.breathingCircle3,
+            {
+              transform: [{ scale: breathingScale3 }],
+              opacity: 0.1,
+            }
+          ]} 
+        />
+        
+        {/* دایره اصلی تایمر */}
         <View style={styles.timerCircle}>
           <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
         </View>
@@ -111,6 +211,49 @@ export default function TimerScreen() {
           در این لحظات، فقط نفس بکشید و صبر کنید
         </Text>
       </View>
+
+      {/* Modal تبریک زیبا */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showCongrats}
+        onRequestClose={() => {
+          setShowCongrats(false);
+          router.back();
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.congratsContainer}>
+            <View style={styles.congratsIconContainer}>
+              <AntDesign name="check-circle" size={60} color="#4CAF50" />
+            </View>
+            <Text style={styles.congratsTitle}>تبریک!</Text>
+            <Text style={styles.congratsMessage}>
+              شما موفق شدید تا انتهای مکث صبر کنید.
+            </Text>
+            <View style={styles.congratsSubContainer}>
+              <MaterialIcons name="star" size={20} color="#FFD700" />
+              <Text style={styles.congratsSubMessage}>
+                این یک پیروزی بزرگ است!
+              </Text>
+              <MaterialIcons name="star" size={20} color="#FFD700" />
+            </View>
+            
+            <TouchableOpacity 
+              style={styles.congratsButton}
+              onPress={() => {
+                setShowCongrats(false);
+                router.back();
+              }}
+            >
+              <View style={styles.congratsButtonContent}>
+                <MaterialIcons name="thumb-up" size={20} color="white" />
+                <Text style={styles.congratsButtonText}>متشکرم</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -132,11 +275,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
-  },
-  exitButtonText: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
   },
   decisionContainer: {
     marginTop: 80,
@@ -171,11 +309,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    zIndex: 10,
   },
   timerText: {
     color: 'white',
     fontSize: 36,
     fontWeight: 'bold',
+  },
+
+  breathingCircle: {
+    position: 'absolute',
+    borderRadius: 200,
+    borderWidth: 2,
+  },
+  breathingCircle1: {
+    width: 320,
+    height: 320,
+    borderColor: 'rgba(76, 175, 80, 0.3)',
+    backgroundColor: 'rgba(76, 175, 80, 0.05)',
+  },
+  breathingCircle2: {
+    width: 280,
+    height: 280,
+    borderColor: 'rgba(76, 175, 80, 0.4)',
+    backgroundColor: 'rgba(76, 175, 80, 0.08)',
+  },
+  breathingCircle3: {
+    width: 240,
+    height: 240,
+    borderColor: 'rgba(76, 175, 80, 0.5)',
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
   },
   messageContainer: {
     backgroundColor: 'rgba(76, 175, 80, 0.2)',
@@ -198,4 +361,83 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
   },
+  
+  // استایل‌های Modal تبریک
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  congratsContainer: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 20,
+    padding: 30,
+    margin: 20,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  congratsIconContainer: {
+    marginBottom: 15,
+    padding: 10,
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    borderRadius: 50,
+  },
+  congratsTitle: {
+    color: '#4CAF50',
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  congratsMessage: {
+    color: 'white',
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 10,
+    lineHeight: 26,
+  },
+  congratsSubContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 25,
+    justifyContent: 'center',
+  },
+  congratsSubMessage: {
+    color: '#4CAF50',
+    fontSize: 16,
+    textAlign: 'center',
+    fontWeight: '500',
+    marginHorizontal: 8,
+  },
+  congratsButton: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 25,
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  congratsButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  congratsButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginLeft: 8,
+  },
+
 });
