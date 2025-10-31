@@ -13,6 +13,7 @@ export const useAppState = () => {
   });
 
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // بارگذاری داده‌ها از AsyncStorage
   useEffect(() => {
@@ -52,11 +53,18 @@ export const useAppState = () => {
   };
 
   const saveAppState = async (newState: AppState) => {
+    if (isSaving) {
+      return;
+    }
+    
     try {
+      setIsSaving(true);
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
       setAppState(newState);
     } catch (error) {
       console.error('Error saving app state:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -72,16 +80,16 @@ export const useAppState = () => {
     }).length;
   };
 
-  const setDecision = (decision: string) => {
+  const setDecision = async (decision: string) => {
     const newState = {
       ...appState,
       currentDecision: decision,
       hasSetDecision: true
     };
-    saveAppState(newState);
+    await saveAppState(newState);
   };
 
-  const startPause = (): string => {
+  const startPause = async (): Promise<string> => {
     const newRecord: PauseRecord = {
       id: Date.now().toString(),
       decision: appState.currentDecision || '',
@@ -108,12 +116,26 @@ export const useAppState = () => {
       todayAttempts: todayAttemptsCount
     };
     
-    saveAppState(newState);
+    await saveAppState(newState);
     return newRecord.id;
   };
 
-  const completePause = (recordId: string, completed: boolean, exitedEarly: boolean) => {
-    const updatedRecords = appState.pauseRecords.map(record => 
+  const completePause = async (recordId: string, completed: boolean, exitedEarly: boolean) => {
+    // بارگذاری مجدد state جاری از AsyncStorage
+    const stored = await AsyncStorage.getItem(STORAGE_KEY);
+    let currentState = appState;
+    
+    if (stored) {
+      const parsedState = JSON.parse(stored);
+      parsedState.pauseRecords = parsedState.pauseRecords.map((record: any) => ({
+        ...record,
+        startTime: new Date(record.startTime),
+        endTime: record.endTime ? new Date(record.endTime) : undefined
+      }));
+      currentState = parsedState;
+    }
+    
+    const updatedRecords = currentState.pauseRecords.map(record => 
       record.id === recordId 
         ? { 
             ...record, 
@@ -125,11 +147,44 @@ export const useAppState = () => {
     );
 
     const newState = {
-      ...appState,
+      ...currentState,
       pauseRecords: updatedRecords
     };
 
+    await saveAppState(newState);
+  };
+
+  const clearAllData = async () => {
+    try {
+      await AsyncStorage.removeItem(STORAGE_KEY);
+      const initialState: AppState = {
+        currentDecision: null,
+        hasSetDecision: false,
+        pauseRecords: [],
+        todayAttempts: 0
+      };
+      setAppState(initialState);
+    } catch (error) {
+      console.error('Error clearing data:', error);
+    }
+  };
+
+  const resetDecision = () => {
+    const newState = {
+      ...appState,
+      currentDecision: '',
+      hasSetDecision: false
+    };
     saveAppState(newState);
+  };
+
+  const updateDecision = async (newDecision: string) => {
+    const newState = {
+      ...appState,
+      currentDecision: newDecision,
+      hasSetDecision: true
+    };
+    await saveAppState(newState);
   };
 
   return {
@@ -137,6 +192,9 @@ export const useAppState = () => {
     loading,
     setDecision,
     startPause,
-    completePause
+    completePause,
+    clearAllData,
+    resetDecision,
+    updateDecision
   };
 };

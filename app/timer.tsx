@@ -11,8 +11,32 @@ export default function TimerScreen() {
   
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
   const [currentMessage, setCurrentMessage] = useState(MOTIVATIONAL_MESSAGES[0]);
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  // ریست کردن state ها با هر recordId جدید
+  useEffect(() => {
+    setTimeLeft(TIMER_DURATION);
+    setCurrentMessage(MOTIVATIONAL_MESSAGES[0]);
+    setIsCompleted(false);
+  }, [recordId]);
+
+  const handleTimerComplete = async () => {
+    if (isCompleted) return; // جلوگیری از اجرای مکرر
+    
+    setIsCompleted(true);
+    // ثبت موفقیت
+    await completePause(recordId as string, true, false);
+    
+    Alert.alert(
+      'تبریک! 🎉',
+      'شما موفق شدید تا انتهای مکث صبر کنید. این یک پیروزی بزرگ است!',
+      [{ text: 'متشکرم', onPress: () => router.back() }]
+    );
+  };
 
   useEffect(() => {
+    if (isCompleted) return; // اگر تکمیل شده، timer را متوقف کن
+    
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -37,22 +61,13 @@ export default function TimerScreen() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentMessage]);
+  }, [currentMessage, isCompleted]);
 
-  const handleTimerComplete = () => {
-    // ثبت موفقیت
-    completePause(recordId as string, true, false);
-    
-    Alert.alert(
-      'تبریک! 🎉',
-      'شما موفق شدید تا انتهای مکث صبر کنید. این یک پیروزی بزرگ است!',
-      [{ text: 'متشکرم', onPress: () => router.back() }]
-    );
-  };
-
-  const handleExit = () => {
+  const handleExit = async () => {
+    // متوقف کردن تایمر
+    setIsCompleted(true);
     // ثبت خروج زودهنگام
-    completePause(recordId as string, false, true);
+    await completePause(recordId as string, false, true);
     router.back();
   };
 

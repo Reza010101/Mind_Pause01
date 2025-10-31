@@ -16,18 +16,18 @@ export default function HomeScreen() {
     );
   }
 
-  const handleSaveDecision = () => {
+  const handleSaveDecision = async () => {
     if (tempDecision.trim()) {
-      setDecision(tempDecision.trim());
+      await setDecision(tempDecision.trim());
       setTempDecision('');
     } else {
       Alert.alert('توجه', 'لطفاً تصمیم خود را بنویسید');
     }
   };
 
-  const handleStartPause = () => {
-    const recordId = startPause();
-    router.push(`/timer?recordId=${recordId}`);
+  const handleStartPause = async () => {
+    const recordId = await startPause();
+    router.replace(`/timer?recordId=${recordId}`);
   };
 
   return (
