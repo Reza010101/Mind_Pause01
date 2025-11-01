@@ -1,23 +1,25 @@
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialIcons } from '@expo/vector-icons';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppStateProvider } from '../src/context/AppStateContext';
 
-export default function RootLayout() {
+function TabsLayout() {
+  const insets = useSafeAreaInsets();
+  
   return (
-    <AppStateProvider>
-      <StatusBar style="auto" />
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: '#4CAF50',
-          tabBarInactiveTintColor: '#666',
-          tabBarStyle: {
-            backgroundColor: 'white',
-            borderTopWidth: 1,
-            borderTopColor: '#e0e0e0',
-            height: 60,
-            paddingBottom: 8,
-          },
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: '#4CAF50',
+        tabBarInactiveTintColor: '#666',
+        tabBarStyle: {
+          backgroundColor: 'white',
+          borderTopWidth: 1,
+          borderTopColor: '#e0e0e0',
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom + 8,
+          paddingTop: 8,
+        },
           tabBarLabelStyle: {
             fontSize: 12,
             fontWeight: '500',
@@ -61,7 +63,17 @@ export default function RootLayout() {
           }}
         />
       </Tabs>
-    </AppStateProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <AppStateProvider>
+        <StatusBar style="auto" translucent={false} />
+        <TabsLayout />
+      </AppStateProvider>
+    </SafeAreaProvider>
   );
 }
 
