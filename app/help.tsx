@@ -4,13 +4,13 @@ import { MaterialIcons, Feather, AntDesign, Ionicons } from '@expo/vector-icons'
 
 export default function HelpScreen() {
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>راهنما</Text>
         <Text style={styles.subtitle}>نحوه استفاده از اپلیکیشن</Text>
       </View>
-      
-      <View style={styles.content}>
+
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <MaterialIcons name="psychology" size={24} color="#2196F3" />
@@ -62,8 +62,8 @@ export default function HelpScreen() {
             پیشرفت خود را در تب "پیشرفت" مشاهده کنید.
           </Text>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -74,21 +74,22 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#2196F3',
-    padding: 30,
+    paddingTop: 24,
+    paddingBottom: 8,
     alignItems: 'center',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '700',
     color: 'white',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 12,
     color: 'white',
     textAlign: 'center',
-    opacity: 0.9,
+    opacity: 0.95,
   },
   content: {
     padding: 20,

@@ -166,9 +166,9 @@ export default function ProgressScreen() {
 
 const styles = StyleSheet.create({
   container: { flex:1, backgroundColor:'#f5f5f5' },
-  header: { backgroundColor:'#FF9800', paddingTop:40, paddingBottom:12, alignItems:'center' },
-  title: { fontSize:22, fontWeight:'bold', color:'white' },
-  subtitle: { fontSize:14, color:'white', opacity:0.95 },
+  header: { backgroundColor:'#FF9800', paddingTop:24, paddingBottom:8, alignItems:'center' },
+  title: { fontSize:18, fontWeight:'700', color:'white' },
+  subtitle: { fontSize:12, color:'white', opacity:0.95 },
   segmentRow: { flexDirection:'row', justifyContent:'center', padding:12, backgroundColor:'#fff' },
   segmentButton: { paddingVertical:8, paddingHorizontal:14, marginHorizontal:6, borderRadius:8, backgroundColor:'#fafafa' },
   segmentActive: { backgroundColor:'#FF9800' },

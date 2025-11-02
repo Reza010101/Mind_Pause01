@@ -5,6 +5,8 @@ export interface PauseRecord {
   endTime?: Date;
   completed: boolean; // true اگر تا آخر صبر کرد
   exitedEarly: boolean; // true اگر ضربدر زد و زودتر خارج شد
+  // تاریخ معادل شمسی برای فیلتر و نمایش سریع
+  jalaliDate?: { year: number; month: number; day: number };
 }
 
 export interface AppState {

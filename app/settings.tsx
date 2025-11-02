@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { MaterialIcons, Feather, Ionicons } from '@expo/vector-icons';
 import { useAppState } from '../src/context/AppStateContext';
@@ -57,13 +58,13 @@ export default function SettingsScreen() {
 
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>تنظیمات</Text>
         <Text style={styles.subtitle}>شخصی‌سازی اپلیکیشن</Text>
       </View>
-      
-      <View style={styles.content}>
+
+      <ScrollView contentContainerStyle={styles.content}>
         {/* اطلاعات اپ */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -71,15 +72,14 @@ export default function SettingsScreen() {
             <Text style={styles.sectionTitle}>اطلاعات اپلیکیشن</Text>
           </View>
           <View style={styles.infoRow}>
+            <Text style={styles.infoValue}>{Constants.expoConfig?.version ?? Constants.manifest?.version ?? '1.0.0'}</Text>
             <Text style={styles.infoLabel}>نسخه:</Text>
-            <Text style={styles.infoValue}>1.0.0</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>کل تلاش‌ها:</Text>
             <Text style={styles.infoValue}>{appState.pauseRecords.length}</Text>
+            <Text style={styles.infoLabel}>کل تلاش‌ها:</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>تصمیم فعلی:</Text>
             <Text style={styles.infoValue}>
               {appState.hasSetDecision ? 
                 <MaterialIcons name="check-circle" size={16} color="#4CAF50" /> : 
@@ -89,6 +89,7 @@ export default function SettingsScreen() {
                 {appState.hasSetDecision ? 'ثبت شده' : 'ثبت نشده'}
               </Text>
             </Text>
+            <Text style={styles.infoLabel}>تصمیم فعلی:</Text>
           </View>
         </View>
 
@@ -133,9 +134,9 @@ export default function SettingsScreen() {
             تمام اطلاعات شما فقط روی گوشی ذخیره می‌شود و هیچ‌گاه به سرور ارسال نمی‌گردد.
           </Text>
         </View>
-      </View>
+  </ScrollView>
 
-      {/* Modal ویرایش تصمیم */}
+  {/* Modal ویرایش تصمیم */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -178,7 +179,7 @@ export default function SettingsScreen() {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -189,21 +190,22 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#607D8B',
-    padding: 30,
+    paddingTop: 24,
+    paddingBottom: 8,
     alignItems: 'center',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '700',
     color: 'white',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 12,
     color: 'white',
     textAlign: 'center',
-    opacity: 0.9,
+    opacity: 0.95,
   },
   content: {
     padding: 20,
@@ -242,11 +244,14 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 16,
     color: '#666',
+    marginLeft: 8,
+    textAlign: 'right',
   },
   infoValue: {
     fontSize: 16,
     fontWeight: '500',
     color: '#333',
+    textAlign: 'right',
   },
   actionButton: {
     backgroundColor: '#f8f9fa',
@@ -256,6 +261,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#dee2e6',
   },
+  actionButtonContent: { flexDirection: 'row', alignItems: 'center' },
+  actionButtonTextContainer: { flex: 1, alignItems: 'flex-end' },
   dangerButton: {
     borderColor: '#dc3545',
     backgroundColor: '#f8d7da',

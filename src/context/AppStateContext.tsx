@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { toJalaali } from 'jalaali-js';
 import { AppState, PauseRecord } from '../types';
 
 const STORAGE_KEY = 'mindPause_appState';
@@ -42,11 +43,22 @@ export const AppStateProvider: React.FC<{ children: ReactNode }> = ({ children }
       if (stored) {
         const parsedState = JSON.parse(stored);
         // تبدیل string های تاریخ به Date objects
-        parsedState.pauseRecords = parsedState.pauseRecords.map((record: any) => ({
-          ...record,
-          startTime: new Date(record.startTime),
-          endTime: record.endTime ? new Date(record.endTime) : undefined
-        }));
+        parsedState.pauseRecords = parsedState.pauseRecords.map((record: any) => {
+          const start = new Date(record.startTime);
+          const end = record.endTime ? new Date(record.endTime) : undefined;
+          // migrate/add jalaliDate if missing
+          let jalaliDate = record.jalaliDate;
+          if (!jalaliDate) {
+            const j = toJalaali(start.getFullYear(), start.getMonth() + 1, start.getDate());
+            jalaliDate = { year: j.jy ?? j.year, month: j.jm ?? j.month, day: j.jd ?? j.day };
+          }
+          return {
+            ...record,
+            startTime: start,
+            endTime: end,
+            jalaliDate
+          };
+        });
         
         // محاسبه مجدد تلاش‌های امروز (در صورت تغییر روز)
         const today = new Date();
@@ -95,12 +107,15 @@ export const AppStateProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   const startPause = async (): Promise<string> => {
+    const now = new Date();
+    const j = toJalaali(now.getFullYear(), now.getMonth() + 1, now.getDate());
     const newRecord: PauseRecord = {
       id: Date.now().toString(),
       decision: appState.currentDecision || '',
-      startTime: new Date(),
+      startTime: now,
       completed: false,
-      exitedEarly: false
+      exitedEarly: false,
+      jalaliDate: { year: j.jy ?? j.year, month: j.jm ?? j.month, day: j.jd ?? j.day }
     };
 
     const updatedRecords = [...appState.pauseRecords, newRecord];
